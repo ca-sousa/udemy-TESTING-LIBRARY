@@ -42,3 +42,21 @@ test("Unchecking Checkbox after being checked disable button", async () => {
   await user.click(checkBox);
   expect(confirmButton).toBeDisabled();
 });
+
+test("Hover action on Popover", async () => {
+  const user = userEvent.setup();
+  render(<SummaryForm />);
+
+  const initialPopover = screen.queryByText('No ice cream will actually be delivered');
+  expect(initialPopover).not.toBeInTheDocument();
+
+  const termsAndConditions = screen.getByText('Terms and Conditions');
+  await user.hover(termsAndConditions);
+  const popover = screen.getByText('No ice cream will actually be delivered');
+  expect(popover).toBeInTheDocument();
+
+
+  await user.unhover(termsAndConditions);
+  const finalPopover = screen.queryByText('No ice cream will actually be delivered');
+  expect(finalPopover).not.toBeInTheDocument();
+});
