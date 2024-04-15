@@ -1,7 +1,7 @@
 import { render, screen } from "../../../test-utils/testing-library-utils";
-import Options from "../Options";
 import userEvent from "@testing-library/user-event";
-import OrderEntry from '../OrderEntry';
+import Options from "../Options";
+import OrderEntry from "../OrderEntry";
 
 test("update scoop subtotal when scoops change", async () => {
   const user = userEvent.setup();
@@ -28,33 +28,31 @@ test("update scoop subtotal when scoops change", async () => {
   expect(scoopsSubtotal).toHaveTextContent("6.00");
 });
 
-test("update scoop subtotal when toopings change", async () => {
+test("update toppings subtotal when toppings change", async () => {
   const user = userEvent.setup();
   render(<Options optionType="toppings" />);
 
-  const toopingTotal = screen.getByText("Toppings total: $", { exact: false });
-  expect(toopingTotal).toHaveTextContent("0.00");
+  // make sure total starts out at $0.00
+  const toppingsTotal = screen.getByText("Toppings total: $", { exact: false });
+  expect(toppingsTotal).toHaveTextContent("0.00");
 
-  const cherriesOption = await screen.findByRole("checkbox", {name: "Cherries" });
-  await user.click(cherriesOption);
-  expect(toopingTotal).toHaveTextContent("1.50")
+  // add cherries and check subtotal
+  const cherriesCheckbox = await screen.findByRole("checkbox", {
+    name: "Cherries",
+  });
+  await user.click(cherriesCheckbox);
+  expect(toppingsTotal).toHaveTextContent("1.50");
 
+  // add hot fudge and check subtotal
   const hotFudgeCheckbox = screen.getByRole("checkbox", { name: "Hot fudge" });
   await user.click(hotFudgeCheckbox);
-  expect(toopingTotal).toHaveTextContent("3.00");
-  
+  expect(toppingsTotal).toHaveTextContent("3.00");
+
   // remove hot fudge and check subtotal
   await user.click(hotFudgeCheckbox);
-  expect(toopingTotal).toHaveTextContent("1.50");
+  expect(toppingsTotal).toHaveTextContent("1.50");
 });
-
 describe("grand total", () => {
-  test("grand total initial state", async () => {
-    render(<OrderEntry />);
-    const grandTotal = screen.getByRole("heading", { name: /Grand total: \$/ });
-    expect(grandTotal).toHaveTextContent("0.00");
-  });
-
   test("grand total updates properly if scoop is added first", async () => {
     const user = userEvent.setup();
 

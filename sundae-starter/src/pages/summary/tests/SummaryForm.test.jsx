@@ -2,61 +2,50 @@ import { render, screen } from "@testing-library/react";
 import SummaryForm from "../SummaryForm";
 import userEvent from "@testing-library/user-event";
 
-test("Check start conditions of the page", () => {
+test("Initial conditions", () => {
   render(<SummaryForm />);
-
-  const checkBox = screen.getByRole("checkbox", {
-    name: "I agree to Terms and Conditions",
+  const checkbox = screen.getByRole("checkbox", {
+    name: /terms and conditions/i,
   });
-  expect(checkBox).not.toBeChecked();
+  expect(checkbox).not.toBeChecked();
 
-  const confirmButton = screen.getByRole("button", { name: "Confirm order" });
+  const confirmButton = screen.getByRole("button", { name: /confirm order/i });
   expect(confirmButton).toBeDisabled();
 });
 
-test("Checking Checkbox enables button", async () => {
+test("Checkbox enables button on first click and disables on second click", async () => {
   const user = userEvent.setup();
+
   render(<SummaryForm />);
-
-  const checkBox = screen.getByRole("checkbox", {
-    name: "I agree to Terms and Conditions",
+  const checkbox = screen.getByRole("checkbox", {
+    name: /terms and conditions/i,
   });
-  const confirmButton = screen.getByRole("button", { name: "Confirm order" });
+  const confirmButton = screen.getByRole("button", { name: /confirm order/i });
 
-  await user.click(checkBox);
-  expect(confirmButton).toBeEnabled();
-});
-
-test("Unchecking Checkbox after being checked disable button", async () => {
-  const user = userEvent.setup();
-  render(<SummaryForm />);
-
-  const checkBox = screen.getByRole("checkbox", {
-    name: "I agree to Terms and Conditions",
-  });
-  const confirmButton = screen.getByRole("button", { name: "Confirm order" });
-
-  await user.click(checkBox);
+  await user.click(checkbox);
   expect(confirmButton).toBeEnabled();
 
-  await user.click(checkBox);
+  await user.click(checkbox);
   expect(confirmButton).toBeDisabled();
 });
 
-test("Hover action on Popover", async () => {
+test("popover responds to hover", async () => {
   const user = userEvent.setup();
   render(<SummaryForm />);
 
-  const initialPopover = screen.queryByText('No ice cream will actually be delivered');
-  expect(initialPopover).not.toBeInTheDocument();
+  // popover starts out hidden
+  const nullPopover = screen.queryByText(
+    /no ice cream will actually be delivered/i
+  );
+  expect(nullPopover).not.toBeInTheDocument();
 
-  const termsAndConditions = screen.getByText('Terms and Conditions');
+  // popover appears on mouseover of checkbox label
+  const termsAndConditions = screen.getByText(/terms and conditions/i);
   await user.hover(termsAndConditions);
-  const popover = screen.getByText('No ice cream will actually be delivered');
+  const popover = screen.getByText(/no ice cream will actually be delivered/i);
   expect(popover).toBeInTheDocument();
 
-
+  // popover disappears when we mouse out
   await user.unhover(termsAndConditions);
-  const finalPopover = screen.queryByText('No ice cream will actually be delivered');
-  expect(finalPopover).not.toBeInTheDocument();
+  expect(popover).not.toBeInTheDocument();
 });
